@@ -17,7 +17,7 @@
         .log { height: 200px; overflow-y: auto; border-top: 1px solid #eee; margin-top: 10px; font-size: 0.85rem; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; z-index: 100; text-align: center; }
         .hidden { display: none !important; }
-        #ranking { margin-top: 20px; font-size: 0.9rem; background: #fff; padding: 10px; border-radius: 10px; width: 100%; max-width: 900px; }
+        #ranking { margin-top: 20px; font-size: 0.9rem; background: #fff; padding: 15px; border-radius: 10px; width: 100%; max-width: 870px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -37,21 +37,14 @@
     <p>あなたの秘密の3桁を決めてください</p>
     <div id="setupDisplay" class="display" style="color: white; border-color: white;">---</div>
     <div class="keypad" style="width: 200px;">
-        <button class="key" onclick="window.pressKey('setup', 1)">1</button>
-        <button class="key" onclick="window.pressKey('setup', 2)">2</button>
-        <button class="key" onclick="window.pressKey('setup', 3)">3</button>
-        <button class="key" onclick="window.pressKey('setup', 4)">4</button>
-        <button class="key" onclick="window.pressKey('setup', 5)">5</button>
-        <button class="key" onclick="window.pressKey('setup', 6)">6</button>
-        <button class="key" onclick="window.pressKey('setup', 7)">7</button>
-        <button class="key" onclick="window.pressKey('setup', 8)">8</button>
-        <button class="key" onclick="window.pressKey('setup', 9)">9</button>
-        <button class="key clear" onclick="window.clearKey('setup')">C</button>
-        <button class="key" onclick="window.pressKey('setup', 0)">0</button>
+        <button class="key" onclick="pressKey('setup', 1)">1</button><button class="key" onclick="pressKey('setup', 2)">2</button><button class="key" onclick="pressKey('setup', 3)">3</button>
+        <button class="key" onclick="pressKey('setup', 4)">4</button><button class="key" onclick="pressKey('setup', 5)">5</button><button class="key" onclick="pressKey('setup', 6)">6</button>
+        <button class="key" onclick="pressKey('setup', 7)">7</button><button class="key" onclick="pressKey('setup', 8)">8</button><button class="key" onclick="pressKey('setup', 9)">9</button>
+        <button class="key clear" onclick="clearKey('setup')">C</button><button class="key" onclick="pressKey('setup', 0)">0</button>
     </div>
-    <div style="margin-top: 20px;">
-        <button class="key action" onclick="window.startGame('cpu')">VS CPU</button>
-        <button class="key action" style="background:var(--success)" onclick="window.startGame('online')">ONLINE対戦</button>
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="key action" onclick="startGame('cpu')">VS CPU</button>
+        <button class="key action" style="background:var(--success)" onclick="startGame('online')">ONLINE対戦</button>
     </div>
 </div>
 
@@ -59,19 +52,12 @@
     <div class="card">
         <h3>PLAYER ATTACK</h3>
         <div id="playerDisplay" class="display">---</div>
-        <div class="keypad" id="mainKeypad">
-            <button class="key" onclick="window.pressKey('play', 1)">1</button>
-            <button class="key" onclick="window.pressKey('play', 2)">2</button>
-            <button class="key" onclick="window.pressKey('play', 3)">3</button>
-            <button class="key" onclick="window.pressKey('play', 4)">4</button>
-            <button class="key" onclick="window.pressKey('play', 5)">5</button>
-            <button class="key" onclick="window.pressKey('play', 6)">6</button>
-            <button class="key" onclick="window.pressKey('play', 7)">7</button>
-            <button class="key" onclick="window.pressKey('play', 8)">8</button>
-            <button class="key" onclick="window.pressKey('play', 9)">9</button>
-            <button class="key clear" onclick="window.clearKey('play')">C</button>
-            <button class="key" onclick="window.pressKey('play', 0)">0</button>
-            <button class="key action" onclick="window.handleAttack()">GO</button>
+        <div class="keypad">
+            <button class="key" onclick="pressKey('play', 1)">1</button><button class="key" onclick="pressKey('play', 2)">2</button><button class="key" onclick="pressKey('play', 3)">3</button>
+            <button class="key" onclick="pressKey('play', 4)">4</button><button class="key" onclick="pressKey('play', 5)">5</button><button class="key" onclick="pressKey('play', 6)">6</button>
+            <button class="key" onclick="pressKey('play', 7)">7</button><button class="key" onclick="pressKey('play', 8)">8</button><button class="key" onclick="pressKey('play', 9)">9</button>
+            <button class="key clear" onclick="clearKey('play')">C</button><button class="key" onclick="pressKey('play', 0)">0</button>
+            <button class="key action" onclick="handleAttack()">GO</button>
         </div>
         <div class="log" id="playerLog"></div>
     </div>
@@ -82,14 +68,14 @@
     </div>
 </div>
 
-<div id="ranking">読み込み中...</div>
+<div id="ranking">ランキング読み込み中...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, push, query, orderByChild, limitToLast, get, onDisconnect } 
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- 【重要】ここに自分のFirebase Configを貼り付けてください ---
+    // --- ここを自分のFirebaseの設定に書き換え！ ---
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -104,8 +90,7 @@
     const db = getDatabase(app);
 
     let myNumber = "", cpuTarget = "", playerInput = "", setupInput = "";
-    let isGameOver = false, cpuLevel = 50, mode = "cpu";
-    let rate = parseInt(localStorage.getItem('hnb_rate')) || 1500;
+    let isGameOver = false, mode = "cpu", rate = parseInt(localStorage.getItem('hnb_rate')) || 1500;
     let roomId = "", playerRole = "", allNumbers = [];
 
     // 初期化
@@ -116,11 +101,11 @@
     document.getElementById('rateVal').innerText = rate;
     loadRanking();
 
-    // グローバルに関数を公開 (onclickで呼ぶため)
-    window.pressKey = (modeType, num) => {
-        let val = modeType === 'setup' ? setupInput : playerInput;
+    // 共通関数をwindowに登録
+    window.pressKey = (type, num) => {
+        let val = type === 'setup' ? setupInput : playerInput;
         if (val.length >= 3 || val.includes(num)) return;
-        if (modeType === 'setup') {
+        if (type === 'setup') {
             setupInput += num;
             document.getElementById('setupDisplay').innerText = setupInput.padEnd(3, '-');
         } else {
@@ -129,40 +114,37 @@
         }
     };
 
-    window.clearKey = (modeType) => {
-        if (modeType === 'setup') { setupInput = ""; document.getElementById('setupDisplay').innerText = "---"; }
+    window.clearKey = (type) => {
+        if (type === 'setup') { setupInput = ""; document.getElementById('setupDisplay').innerText = "---"; }
         else { playerInput = ""; document.getElementById('playerDisplay').innerText = "---"; }
     };
 
     window.startGame = async (selectedMode) => {
-        if (setupInput.length !== 3) return alert("3桁決めてね");
+        if (setupInput.length !== 3) return alert("3桁の数字を先に決めてください");
         myNumber = setupInput;
         mode = selectedMode;
         document.getElementById('myNumView').innerText = myNumber;
 
         if (mode === 'cpu') {
-            cpuLevel = parseInt(document.getElementById('lvRange').value);
-            document.getElementById('modeDisplay').innerText = "VS CPU (Lv" + cpuLevel + ")";
+            document.getElementById('modeDisplay').innerText = "VS CPU";
             cpuTarget = [...allNumbers].sort(() => Math.random() - 0.5)[0];
             document.getElementById('setupOverlay').classList.add('hidden');
             document.getElementById('gameStatus').innerText = "あなたのターン";
         } else {
-            const id = prompt("部屋名(合言葉)を決めてください");
-            if(!id) return;
-            roomId = id;
-            document.getElementById('modeDisplay').innerText = "ONLINE (" + roomId + ")";
+            roomId = prompt("部屋名(合言葉)を決めてください");
+            if(!roomId) return;
+            document.getElementById('modeDisplay').innerText = "ONLINE: " + roomId;
             await joinOnlineRoom();
         }
     };
 
-    // --- オンライン対戦ロジック ---
     async function joinOnlineRoom() {
         const roomRef = ref(db, 'rooms/' + roomId);
-        const snapshot = await get(roomRef);
-        if (!snapshot.exists()) {
+        const snap = await get(roomRef);
+        if (!snap.exists()) {
             playerRole = 'p1';
             await set(roomRef, { p1: myNumber, status: 'waiting', turn: 'p1' });
-            document.getElementById('gameStatus').innerText = "待機中...";
+            document.getElementById('gameStatus').innerText = "相手を待っています...";
         } else {
             playerRole = 'p2';
             await update(roomRef, { p2: myNumber, status: 'playing' });
@@ -170,13 +152,12 @@
         document.getElementById('setupOverlay').classList.add('hidden');
         onDisconnect(roomRef).remove();
 
-        onValue(roomRef, (snap) => {
-            const data = snap.val();
+        onValue(roomRef, (s) => {
+            const data = s.val();
             if(!data) return;
             if(data.status === 'playing') {
                 const isMyTurn = data.turn === playerRole;
                 document.getElementById('gameStatus').innerText = isMyTurn ? "あなたのターン" : "相手のターン";
-                // 相手の攻撃判定
                 const lastAtk = playerRole === 'p1' ? data.p2_atk : data.p1_atk;
                 if(lastAtk && !isMyTurn) {
                     const res = getHB(lastAtk, myNumber);
@@ -189,35 +170,27 @@
 
     window.handleAttack = async () => {
         if (isGameOver || playerInput.length !== 3) return;
-        
         if (mode === 'online') {
             const roomRef = ref(db, 'rooms/' + roomId);
             const snap = await get(roomRef);
             const data = snap.val();
-            if (data.turn !== playerRole || data.status !== 'playing') return alert("まだあなたの番ではありません");
-
+            if (data.turn !== playerRole || data.status !== 'playing') return alert("相手のターンです");
             const target = playerRole === 'p1' ? data.p2 : data.p1;
             const res = getHB(playerInput, target);
             addLog('playerLog', playerInput, res);
-
-            const updates = { turn: playerRole === 'p1' ? 'p2' : 'p1' };
-            updates[playerRole + '_atk'] = playerInput;
-            await update(roomRef, updates);
-
+            const up = { turn: playerRole === 'p1' ? 'p2' : 'p1' };
+            up[playerRole + '_atk'] = playerInput;
+            await update(roomRef, up);
             if (res.h === 3) finishGame(true);
         } else {
-            // CPU対戦
             let res = getHB(playerInput, cpuTarget);
             addLog('playerLog', playerInput, res);
             if (res.h === 3) return finishGame(true);
-            
-            document.getElementById('gameStatus').innerText = "CPU思考中...";
             setTimeout(() => {
-                let guess = allNumbers[Math.floor(Math.random() * allNumbers.length)]; // 簡易CPU
-                let cres = getHB(guess, myNumber);
-                addLog('cpuLog', guess, cres);
-                if (cres.h === 3) finishGame(false);
-                document.getElementById('gameStatus').innerText = "あなたのターン";
+                let g = allNumbers[Math.floor(Math.random() * allNumbers.length)];
+                let cr = getHB(g, myNumber);
+                addLog('cpuLog', g, cr);
+                if (cr.h === 3) finishGame(false);
             }, 600);
         }
         playerInput = "";
@@ -226,42 +199,33 @@
 
     function getHB(g, a) {
         let h = 0, b = 0;
-        for(let i=0; i<3; i++) {
-            if(g[i] === a[i]) h++;
-            else if(a.includes(g[i])) b++;
-        }
+        for(let i=0; i<3; i++) { if(g[i]===a[i]) h++; else if(a.includes(g[i])) b++; }
         return {h, b};
     }
 
-    async function finishGame(isWin) {
+    async function finishGame(win) {
+        if(isGameOver) return;
         isGameOver = true;
-        let diff = isWin ? 30 : -20;
-        rate += diff;
+        rate += win ? 30 : -20;
         localStorage.setItem('hnb_rate', rate);
-        
-        const name = prompt((isWin ? "勝利！" : "敗北...") + " 名前を入力してランキングに登録", "名無し");
-        if(name) {
-            await push(ref(db, 'ranking'), { name, rate, date: Date.now() });
-        }
+        const name = prompt((win ? "【勝利】" : "【敗北】") + " 名前を入力してランキング登録", "Player");
+        if(name) await push(ref(db, 'ranking'), { name, rate, date: Date.now() });
         location.reload();
     }
 
     function addLog(id, val, res) {
-        const log = document.getElementById(id);
         const div = document.createElement('div');
         div.innerHTML = `<b>${val}</b>: <span style="color:red">${res.h}H</span> <span style="color:orange">${res.b}B</span>`;
-        log.prepend(div);
+        document.getElementById(id).prepend(div);
     }
 
     function loadRanking() {
-        const rankingRef = query(ref(db, 'ranking'), orderByChild('rate'), limitToLast(5));
-        onValue(rankingRef, (snap) => {
-            let html = "<b>【全国ランキング TOP5】</b><br>";
+        const rRef = query(ref(db, 'ranking'), orderByChild('rate'), limitToLast(5));
+        onValue(rRef, (snap) => {
+            let html = "<b>🏆 全国ランキング TOP5</b><br>";
             const items = [];
             snap.forEach(c => { items.push(c.val()); });
-            items.reverse().forEach((it, i) => {
-                html += `${i+1}位: ${it.name} (${it.rate}) / `;
-            });
+            items.reverse().forEach((it, i) => { html += `${i+1}位: ${it.name} (${it.rate}) ｜ `; });
             document.getElementById('ranking').innerHTML = html;
         });
     }
